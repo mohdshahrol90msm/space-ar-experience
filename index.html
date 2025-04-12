@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Space AR Experience</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.rawgit.com/jeromeetienne/ar.js/2.0.1/aframe/build/aframe-ar.min.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+  </head>
+  <body style="margin: 0; overflow: hidden;">
+    <a-scene embedded arjs>
+      <!-- Planets will be added here by JavaScript -->
+    </a-scene>
+    <div id="resize-controls">
+      <button id="scale-up">Zoom In Venus</button>
+      <button id="scale-down">Zoom Out Venus</button>
+    </div>
+    <script src="js/script.js"></script>
+  </body>
+</html>
