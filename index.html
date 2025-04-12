@@ -2,57 +2,102 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Space AR Experience - Venus</title>
+  <title>Space AR Experience - Planets (Markerless)</title>
   <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-  <script src="https://cdn.rawgit.com/jeromeetienne/ar.js/2.0.1/aframe/build/aframe-ar.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar-nft.js"></script>
+  <script src="https://unpkg.com/aframe-gps-camera@1.7.3/dist/aframe-gps-camera.min.js"></script>
   <style>
-    #resize-controls {
+    #controls {
       position: fixed;
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 100;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 90%;
     }
-    #resize-controls button {
-      padding: 10px 20px;
-      font-size: 16px;
+    #controls button {
+      padding: 10px 12px;
+      font-size: 14px;
       margin: 5px;
       border: none;
       border-radius: 8px;
       background-color: #6c63ff;
       color: white;
+      cursor: pointer;
     }
   </style>
 </head>
 <body style="margin: 0; overflow: hidden;">
-  <a-scene embedded arjs>
-    <!-- Venus model -->
-    <a-entity id="venus" gltf-model="models/venus.glb" position="0 0 -3" scale="0.5 0.5 0.5"
+
+  <a-scene
+    vr-mode-ui="enabled: false"
+    embedded
+    arjs="sourceType: webcam; debugUIEnabled: false;"
+    renderer="logarithmicDepthBuffer: true;"
+  >
+    <!-- GPS Camera -->
+    <a-entity gps-camera rotation-reader></a-entity>
+
+    <!-- Venus -->
+    <a-entity
+      id="venus"
+      gltf-model="models/venus.glb"
+      scale="0.5 0.5 0.5"
+      rotation="0 0 0"
+      gps-entity-place="latitude: 4.685982253292534; longitude: 114.9809351834782"
       planet-info="name: Venus; fact: Venus is the hottest planet in the solar system.; question: What makes Venus so hot?; options: Greenhouse gases, Solar flares, Its size; answer: Greenhouse gases">
     </a-entity>
 
-    <!-- Optional additional planets -->
-    <a-entity gltf-model="models/mars.glb" position="2 0 -3" scale="0.5 0.5 0.5"
+    <!-- Mars -->
+    <a-entity
+      id="mars"
+      gltf-model="models/mars.glb"
+      scale="0.5 0.5 0.5"
+      rotation="0 0 0"
+      gps-entity-place="latitude: 4.6865; longitude: 114.9815"
       planet-info="name: Mars; fact: Mars is known as the Red Planet.; question: Why is Mars red?; options: Iron oxide, Water, Sand; answer: Iron oxide">
     </a-entity>
-    <a-entity gltf-model="models/jupiter.glb" position="-2 0 -3" scale="0.5 0.5 0.5"
+
+    <!-- Jupiter -->
+    <a-entity
+      id="jupiter"
+      gltf-model="models/jupiter.glb"
+      scale="0.5 0.5 0.5"
+      rotation="0 0 0"
+      gps-entity-place="latitude: 4.6853; longitude: 114.9800"
       planet-info="name: Jupiter; fact: Jupiter is the largest planet in our solar system.; question: How many moons does Jupiter have?; options: 79, 3, 12; answer: 79">
     </a-entity>
   </a-scene>
 
-  <div id="resize-controls">
-    <button id="scale-up">Zoom In Venus</button>
-    <button id="scale-down">Zoom Out Venus</button>
+  <!-- Control Buttons -->
+  <div id="controls">
+    <button onclick="toggleVisibility('venus')">Toggle Venus</button>
+    <button onclick="scalePlanet('venus', 0.1)">+ Venus</button>
+    <button onclick="scalePlanet('venus', -0.1)">- Venus</button>
+    <button onclick="rotatePlanet('venus', 10)">↺ Venus</button>
+
+    <button onclick="toggleVisibility('mars')">Toggle Mars</button>
+    <button onclick="scalePlanet('mars', 0.1)">+ Mars</button>
+    <button onclick="scalePlanet('mars', -0.1)">- Mars</button>
+    <button onclick="rotatePlanet('mars', 10)">↺ Mars</button>
+
+    <button onclick="toggleVisibility('jupiter')">Toggle Jupiter</button>
+    <button onclick="scalePlanet('jupiter', 0.1)">+ Jupiter</button>
+    <button onclick="scalePlanet('jupiter', -0.1)">- Jupiter</button>
+    <button onclick="rotatePlanet('jupiter', 10)">↺ Jupiter</button>
   </div>
 
   <script>
     AFRAME.registerComponent('planet-info', {
       schema: {
-        name: {type: 'string'},
-        fact: {type: 'string'},
-        question: {type: 'string'},
-        options: {type: 'array'},
-        answer: {type: 'string'}
+        name: { type: 'string' },
+        fact: { type: 'string' },
+        question: { type: 'string' },
+        options: { type: 'array' },
+        answer: { type: 'string' }
       },
       init: function () {
         this.el.addEventListener('click', () => {
@@ -63,26 +108,30 @@
       }
     });
 
-    window.addEventListener('load', () => {
-      const resizeFactor = 0.1;
-      const venus = document.querySelector('#venus');
+    function toggleVisibility(id) {
+      const el = document.getElementById(id);
+      const current = el.getAttribute('visible');
+      el.setAttribute('visible', !current);
+    }
 
-      document.getElementById('scale-up').addEventListener('click', () => {
-        let scale = venus.getAttribute('scale');
-        scale.x += resizeFactor;
-        scale.y += resizeFactor;
-        scale.z += resizeFactor;
-        venus.setAttribute('scale', scale);
-      });
+    function scalePlanet(id, delta) {
+      const el = document.getElementById(id);
+      let scale = el.getAttribute('scale');
+      scale.x = Math.max(0.1, scale.x + delta);
+      scale.y = Math.max(0.1, scale.y + delta);
+      scale.z = Math.max(0.1, scale.z + delta);
+      el.setAttribute('scale', scale);
+    }
 
-      document.getElementById('scale-down').addEventListener('click', () => {
-        let scale = venus.getAttribute('scale');
-        scale.x = Math.max(0.1, scale.x - resizeFactor);
-        scale.y = Math.max(0.1, scale.y - resizeFactor);
-        scale.z = Math.max(0.1, scale.z - resizeFactor);
-        venus.setAttribute('scale', scale);
+    function rotatePlanet(id, angle) {
+      const el = document.getElementById(id);
+      let rotation = el.getAttribute('rotation');
+      el.setAttribute('rotation', {
+        x: rotation.x,
+        y: rotation.y + angle,
+        z: rotation.z
       });
-    });
+    }
   </script>
 </body>
 </html>
